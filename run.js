@@ -42,32 +42,10 @@ if (fs.existsSync(envFile)) {
 } else {
     const { models } = require(path.resolve(serverPath, 'lib/rc-scanner/models'));
 
-    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-
     const askModel = () => {
-        process.stdout.write('\nPlease select one of the following scanner model:\n\n');
-
-        models.forEach((model, index) => process.stdout.write(`(${index + 1}) ${model.name}\n`));
-
-        rl.question('\nEnter model: ', (answer) => {
-            answer = parseInt(answer, 10);
-
-            if (answer >= 1 && answer <= models.length) {
-                model = models[answer - 1].name;
-                rl.close();
-
-            } else {
-                process.stdout.write('\n!!! Invalid answer !!!\n\n');
-                askModel();
-            }
-        });
-    }
-
-    let model;
-
-    rl.on('close', () => {
+        
+        model = models[0].name;
         const comPort = process.platform === 'win32' ? 'com1' : '/dev/ttyACM0';
-
         const data = [
             `NODE_ENV=production`,
             `NODE_HOST=0.0.0.0`,
@@ -88,15 +66,12 @@ if (fs.existsSync(envFile)) {
             `RC_COM_STOPBITS=1`,
             ``,
         ].join('\n');
-
         fs.writeFileSync(envFile, data);
-
-        process.stdout.write(`\nDefault configuration created at ${envFile}.\n`);
-        process.stdout.write(`\nPlease review them, then re-run the application.\n`);
-        process.stdout.write(`\n${data}\n`);
-
         process.exit(0);
-    });
+
+    }
+
+    let model;
 
     askModel();
 }
